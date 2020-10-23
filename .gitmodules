@@ -1,0 +1,9 @@
+[submodule "Mastering-Embedded-Linux-Programming-Second-Edition"]
+	path = Mastering-Embedded-Linux-Programming-Second-Edition
+	url = https://github.com/PacktPublishing/Mastering-Embedded-Linux-Programming-Second-Edition.git
+[submodule "u-boot"]
+	path = u-boot
+	url = https://github.com/u-boot/u-boot
+[submodule "crosstool-ng"]
+	path = crosstool-ng
+	url = https://github.com/crosstool-ng/crosstool-ng.git
