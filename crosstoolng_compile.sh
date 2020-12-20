@@ -3,4 +3,4 @@ git checkout crosstool-ng-1.24.0
 ./bootstrap
 ./configure --enable-local
 make
-make install
+sudo make install
