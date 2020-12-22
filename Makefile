@@ -47,6 +47,8 @@ $(UBOOT_IMG) $(UBOOT_MLO): $(TOOLCHAIN)
 #
 KERNEL_DIR := $(mkfile_path)linux
 KERNEL_ZIMAGE := $(KERNEL_DIR)/arch/$(ARCH)/boot/zImage
+KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dtb
+KERNEL_DTS := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dts
 
 KERNEL_MAKE := cd $(KERNEL_DIR); PATH=$(PATH) make -j4 ARCH=$(ARCH)
 
@@ -59,10 +61,16 @@ kernel_config:
 $(KERNEL_ZIMAGE): $(TOOLCHAIN)
 	$(KERNEL_MAKE) CROSS_COMPILE=$(CROSS_COMPILE) vmlinux
 	$(KERNEL_MAKE) CROSS_COMPILE=$(CROSS_COMPILE) zImage
-	$(KERNEL_MAKE) dtbs
 	$(KERNEL_MAKE) CROSS_COMPILE=$(CROSS_COMPILE) modules
 
-kernel_clean_rebuild: kernel_clean kernel_config $(KERNEL_ZIMAGE)
+
+$(KERNEL_DTB): $(TOOLCHAIN)
+	$(KERNEL_MAKE) dtbs
+
+
+kernel_dtbs: $(KERNEL_DTBS) kernel_config
+
+kernel_clean_rebuild: kernel_clean kernel_config $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 kernel: $(KERNEL_ZIMAGE)
 
 # Format sd card
@@ -72,14 +80,14 @@ format-sdcard:
 	@echo formatting SDCARD_NAME=$(SDCARD_NAME)
 	$(MELP)/format-sdcard.sh $(SDCARD_NAME)
 
-load_u-boot: $(UBOOT_IMG) $(UBOOT_MLO)
+load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 	sudo cp $(UBOOT_MLO) $(UBOOT_IMG) /media/$$USER/boot
 	sudo cp $(mkfile_path)uEnv.txt /media/$$USER/boot
+	sudo cp $(KERNEL_ZIMAGE) /media/$$USER/boot
+	sudo cp $(KERNEL_DTB) /media/$$USER/boot
 
-	sudo umount /media/$$USER/boot
 
 
-load_kernel:
 
 
 
