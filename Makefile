@@ -86,7 +86,17 @@ load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 	sudo cp $(KERNEL_ZIMAGE) /media/$$USER/boot
 	sudo cp $(KERNEL_DTB) /media/$$USER/boot
 
+BUILDROOT := $(mkfile_path)buildroot
+BUILDROOT_MAKE := cd $(BUILDROOT); make
 
+buildroot_config:
+	$(BUILDROOT_MAKE) beaglebone_defconfig
+
+buildroot_clean:
+	$(BUILDROOT_MAKE) clean
+
+buildroot:
+	$(BUILDROOT_MAKE)
 
 
 
