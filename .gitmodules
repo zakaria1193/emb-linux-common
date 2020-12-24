@@ -12,4 +12,4 @@
 	url = https://github.com/torvalds/linux.git
 [submodule "buildroot"]
 	path = buildroot
-	url = git://git.buildroot.net/buildroot
+	url = https://github.com/zakaria1193/buildroot.git
