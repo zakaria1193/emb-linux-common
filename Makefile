@@ -4,6 +4,8 @@ all:
 
 ARCH := arm
 
+SDCARD_NAME := mmcblk0
+
 TOOLCHAIN_LINARO := ~/my_repos/emb-linux-common/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 
 # toolchain builder crosstool ng
@@ -88,17 +90,23 @@ load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 
 BUILDROOT := $(mkfile_path)buildroot
 BUILDROOT_MAKE := cd $(BUILDROOT); make
-
-buildroot_config:
-	$(BUILDROOT_MAKE) beaglebone_defconfig
+BUILDROOT_DEFCONFIG := $(BUILDROOT)/buildroot_defconfig
 
 buildroot_clean:
 	$(BUILDROOT_MAKE) clean
 
+buildroot_config:
+	$(BUILDROOT_MAKE) menuconfig
+	$(BUILDROOT_MAKE) savedefconfig
+	cp $(BUILDROOT)/configs/beaglebone_defconfig $(BUILDROOT_DEFCONFIG)
+
 buildroot:
+	cp $(BUILDROOT_DEFCONFIG) $(BUILDROOT)/configs/beaglebone_defconfig -f
+	$(BUILDROOT_MAKE) beaglebone_defconfig
 	$(BUILDROOT_MAKE)
 
-
+buildroot_load:
+	sudo dd if=$(BUILDROOT)/output/images/sdcard.img of=/dev/$(SDCARD_NAME) bs=1M
 
 
 .PHONY: u-boot toolchain format-sdcard kernel
