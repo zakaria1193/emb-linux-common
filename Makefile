@@ -96,13 +96,10 @@ buildroot_clean:
 	$(BUILDROOT_MAKE) clean
 
 buildroot_config:
-	$(BUILDROOT_MAKE) menuconfig
+	$(BUILDROOT_MAKE) beaglebone_defconfig
 	$(BUILDROOT_MAKE) savedefconfig
-	cp $(BUILDROOT)/configs/beaglebone_defconfig $(BUILDROOT_DEFCONFIG)
 
 buildroot:
-	cp $(BUILDROOT_DEFCONFIG) $(BUILDROOT)/configs/beaglebone_defconfig -f
-	$(BUILDROOT_MAKE) beaglebone_defconfig
 	$(BUILDROOT_MAKE)
 
 buildroot_load:
