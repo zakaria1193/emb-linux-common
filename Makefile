@@ -6,7 +6,17 @@ ARCH := arm
 
 SDCARD_NAME := mmcblk0
 
+# Pick toolchain here, ng or linaro
+USE_LINARO_TOOLCHAIN := y
+
+ifeq (USE_LINARO_TOOLCHAIN, y)
+
+$(info Using Linaro toolchain)
 TOOLCHAIN_LINARO := ~/my_repos/emb-linux-common/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
+TOOLCHAIN := $(TOOLCHAIN_LINARO)
+
+else
+$(info Building toolchain with cross tool ng)
 
 # toolchain builder crosstool ng
 CT-NG-DIR := ~/my_repos/emb-linux-common/crosstool-ng/
@@ -24,8 +34,8 @@ $(TOOLCHAIN_NG): $(CT-NG)
 	$(CT-NG) menuconfig
 	$(CT-NG) build
 
-# pick toolchain here, ng or linaro
-TOOLCHAIN := $(TOOLCHAIN_LINARO)
+TOOLCHAIN := $(TOOLCHAIN_NG)
+endif
 
 CROSS_COMPILE := $(subst gcc,,$(notdir $(TOOLCHAIN)))
 export PATH := $(dir $(TOOLCHAIN)):$(PATH)
