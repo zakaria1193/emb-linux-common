@@ -6,15 +6,18 @@ ARCH := arm
 
 SDCARD_NAME := mmcblk0
 
+###############################################################################
 # Pick toolchain here, ng or linaro
 USE_LINARO_TOOLCHAIN := y
 
+#******************************************************************************
 ifeq (USE_LINARO_TOOLCHAIN, y)
 
 $(info Using Linaro toolchain)
 TOOLCHAIN_LINARO := ~/my_repos/emb-linux-common/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 TOOLCHAIN := $(TOOLCHAIN_LINARO)
 
+#******************************************************************************
 else
 $(info Building toolchain with cross tool ng)
 
@@ -36,13 +39,13 @@ $(TOOLCHAIN_NG): $(CT-NG)
 
 TOOLCHAIN := $(TOOLCHAIN_NG)
 endif
-
-CROSS_COMPILE := $(subst gcc,,$(notdir $(TOOLCHAIN)))
-export PATH := $(dir $(TOOLCHAIN)):$(PATH)
+#******************************************************************************
 
 toolchain: $(TOOLCHAIN)
 
-# u-boot compile
+###############################################################################
+
+# U-boot compile
 UBOOT_DIR := $(mkfile_path)u-boot
 UBOOT_BOARD_CONFIG := am335x_evm_defconfig
 UBOOT_IMG := $(UBOOT_DIR)/u-boot.img
@@ -50,13 +53,16 @@ UBOOT_MLO := $(UBOOT_DIR)/MLO
 
 u-boot: $(UBOOT_IMG) $(UBOOT_MLO)
 
+CROSS_COMPILE := $(subst gcc,,$(notdir $(TOOLCHAIN)))
+export PATH := $(dir $(TOOLCHAIN)):$(PATH)
+
 $(UBOOT_IMG) $(UBOOT_MLO): $(TOOLCHAIN)
 	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)
 	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE)
 
-
+###############################################################################
 # KERNEL
-#
+
 KERNEL_DIR := $(mkfile_path)linux
 KERNEL_ZIMAGE := $(KERNEL_DIR)/arch/$(ARCH)/boot/zImage
 KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dtb
@@ -79,12 +85,12 @@ $(KERNEL_ZIMAGE): $(TOOLCHAIN)
 $(KERNEL_DTB): $(TOOLCHAIN)
 	$(KERNEL_MAKE) dtbs
 
-
 kernel_dtbs: $(KERNEL_DTBS) kernel_config
 
 kernel_clean_rebuild: kernel_clean kernel_config $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 kernel: $(KERNEL_ZIMAGE)
 
+###############################################################################
 # Format sd card
 MELP := $(mkfile_path)Mastering-Embedded-Linux-Programming-Second-Edition
 
@@ -98,6 +104,8 @@ load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 	sudo cp $(KERNEL_ZIMAGE) /media/$$USER/boot
 	sudo cp $(KERNEL_DTB) /media/$$USER/boot
 
+
+###############################################################################
 BUILDROOT := $(mkfile_path)buildroot
 BUILDROOT_MAKE := cd $(BUILDROOT); make
 BUILDROOT_DEFCONFIG := $(BUILDROOT)/buildroot_defconfig
