@@ -8,18 +8,21 @@ SDCARD_NAME := mmcblk0
 
 ###############################################################################
 # Pick toolchain here, ng or linaro
-USE_LINARO_TOOLCHAIN := y
+#USE_TOOLCHAIN := LINARO_TOOLCHAIN
+USE_TOOLCHAIN := CROSSTOOL_NG_TOOLCHAIN
 
 #******************************************************************************
-ifeq (USE_LINARO_TOOLCHAIN, y)
-
+ifeq ($(USE_TOOLCHAIN), LINARO_TOOLCHAIN)
 $(info Using Linaro toolchain)
 TOOLCHAIN_LINARO := ~/my_repos/emb-linux-common/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 TOOLCHAIN := $(TOOLCHAIN_LINARO)
 
 #******************************************************************************
-else
+else ifeq ($(USE_TOOLCHAIN), CROSSTOOL_NG_TOOLCHAIN)
 $(info Building toolchain with cross tool ng)
+
+cross_tool_ng_tools:
+	sudo apt install -y flex texinfo help2man gawk  libtool-bin libtool-doc autoconf automake libtool  libncurses-dev bison byacc
 
 # toolchain builder crosstool ng
 CT-NG-DIR := ~/my_repos/emb-linux-common/crosstool-ng/
@@ -38,10 +41,13 @@ $(TOOLCHAIN_NG): $(CT-NG)
 	$(CT-NG) build
 
 TOOLCHAIN := $(TOOLCHAIN_NG)
+else
+$(error USE_TOOLCHAIN not set, select a toolchain)
 endif
 #******************************************************************************
 
 toolchain: $(TOOLCHAIN)
+	@echo Toolchain used is: $(TOOLCHAIN)
 
 ###############################################################################
 
