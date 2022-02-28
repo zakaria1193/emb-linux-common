@@ -4,8 +4,6 @@ all:
 
 ARCH := arm
 
-SDCARD_NAME := mmcblk0
-
 ###############################################################################
 # Pick toolchain here, ng or linaro
 USE_TOOLCHAIN := LINARO_TOOLCHAIN
@@ -63,10 +61,15 @@ UBOOT_MLO := $(UBOOT_DIR)/MLO
 
 u-boot: $(UBOOT_IMG) $(UBOOT_MLO)
 
-CROSS_COMPILE := $(subst gcc,,$(notdir $(TOOLCHAIN)))
+u-boot-clean:
+	make -C $(UBOOT_DIR) clean
+
+CROSS_COMPILE := "ccache $(subst gcc,,$(notdir $(TOOLCHAIN)))"
 export PATH := $(dir $(TOOLCHAIN)):$(PATH)
 
 $(UBOOT_IMG) $(UBOOT_MLO): $(TOOLCHAIN)
+	echo "PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)"
+	return
 	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)
 	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE)
 
@@ -79,6 +82,9 @@ KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dtb
 KERNEL_DTS := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dts
 
 KERNEL_MAKE := cd $(KERNEL_DIR); PATH=$(PATH) make -j4 ARCH=$(ARCH)
+
+kernel_tools:
+	sudo apt install -y libssl-dev
 
 kernel_clean:
 	$(KERNEL_MAKE) CROSS_COMPILE=$(CROSS_COMPILE) mrproper
@@ -104,8 +110,12 @@ kernel: $(KERNEL_ZIMAGE)
 # Format sd card
 MELP := $(mkfile_path)Mastering-Embedded-Linux-Programming-Second-Edition
 
-format-sdcard:
-	@echo formatting SDCARD_NAME=$(SDCARD_NAME)
+format_sdcard:
+	@echo Pick SD card name:
+	ls /dev/sd* /dev/mmcblk*
+	lsblk
+	read SDCARD_NAME
+	@echo formatting $(SDCARD_NAME)
 	$(MELP)/format-sdcard.sh $(SDCARD_NAME)
 
 load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
