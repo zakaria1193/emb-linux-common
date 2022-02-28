@@ -8,8 +8,8 @@ SDCARD_NAME := mmcblk0
 
 ###############################################################################
 # Pick toolchain here, ng or linaro
-#USE_TOOLCHAIN := LINARO_TOOLCHAIN
-USE_TOOLCHAIN := CROSSTOOL_NG_TOOLCHAIN
+USE_TOOLCHAIN := LINARO_TOOLCHAIN
+#USE_TOOLCHAIN := CROSSTOOL_NG_TOOLCHAIN
 
 #******************************************************************************
 ifeq ($(USE_TOOLCHAIN), LINARO_TOOLCHAIN)
@@ -21,12 +21,16 @@ TOOLCHAIN := $(TOOLCHAIN_LINARO)
 else ifeq ($(USE_TOOLCHAIN), CROSSTOOL_NG_TOOLCHAIN)
 $(info Building toolchain with cross tool ng)
 
-cross_tool_ng_tools:
+crosstool-ng-tools:
 	sudo apt install -y flex texinfo help2man gawk  libtool-bin libtool-doc autoconf automake libtool  libncurses-dev bison byacc
 
 # toolchain builder crosstool ng
 CT-NG-DIR := ~/my_repos/emb-linux-common/crosstool-ng/
 CT-NG := $(CT-NG-DIR)/ct-ng
+
+crosstool-ng-clean:
+	rm -rf $(CT-NG)
+	make -C $(CT-NG-DIR) clean
 
 $(CT-NG):
 	bash -c $(mkfile_path)crosstoolng_compile.sh
