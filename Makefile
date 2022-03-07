@@ -1,4 +1,4 @@
-mkfile_path := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+mkfile_path := $(realpath $(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 
 all:
 
@@ -11,14 +11,11 @@ USE_TOOLCHAIN := LINARO_TOOLCHAIN
 
 #******************************************************************************
 ifeq ($(USE_TOOLCHAIN), LINARO_TOOLCHAIN)
-$(info Using Linaro toolchain)
 TOOLCHAIN_LINARO := ~/my_repos/emb-linux-common/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 TOOLCHAIN := $(TOOLCHAIN_LINARO)
 
 #******************************************************************************
 else ifeq ($(USE_TOOLCHAIN), CROSSTOOL_NG_TOOLCHAIN)
-$(info Building toolchain with cross tool ng)
-
 crosstool-ng-tools:
 	sudo apt install -y flex texinfo help2man gawk  libtool-bin libtool-doc autoconf automake libtool  libncurses-dev bison byacc
 
@@ -31,7 +28,7 @@ crosstool-ng-clean:
 	make -C $(CT-NG-DIR) clean
 
 $(CT-NG):
-	bash -c $(mkfile_path)crosstoolng_compile.sh
+	bash -c $(mkfile_path)/crosstoolng_compile.sh
 
 crosstool-ng: $(CT-NG)
 
@@ -54,7 +51,7 @@ toolchain: $(TOOLCHAIN)
 ###############################################################################
 
 # U-boot compile
-UBOOT_DIR := $(mkfile_path)u-boot
+UBOOT_DIR := $(mkfile_path)/u-boot
 UBOOT_BOARD_CONFIG := am335x_evm_defconfig
 UBOOT_IMG := $(UBOOT_DIR)/u-boot.img
 UBOOT_MLO := $(UBOOT_DIR)/MLO
@@ -76,7 +73,7 @@ $(UBOOT_IMG) $(UBOOT_MLO): $(TOOLCHAIN)
 ###############################################################################
 # KERNEL
 
-KERNEL_DIR := $(mkfile_path)linux
+KERNEL_DIR := $(mkfile_path)/linux
 KERNEL_ZIMAGE := $(KERNEL_DIR)/arch/$(ARCH)/boot/zImage
 KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dtb
 KERNEL_DTS := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/am335x-boneblue.dts
@@ -107,22 +104,31 @@ kernel_clean_rebuild: kernel_clean kernel_config $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 kernel: $(KERNEL_ZIMAGE)
 
 ###############################################################################
-# Format sd card
-MELP := $(mkfile_path)Mastering-Embedded-Linux-Programming-Second-Edition
+# SD card
+
+SD_CARD_MOUNT_DIR := $(mkfile_path)/sd-card-mount
+
+SD_CARD_DEVICE := sda
+SD_CARD_DEV_PATH_BOOT := /dev/$(SD_CARD_DEVICE)1
 
 format_sdcard:
-	@echo Pick SD card name:
-	ls /dev/sd* /dev/mmcblk*
-	lsblk
-	read SDCARD_NAME
-	@echo formatting $(SDCARD_NAME)
-	$(MELP)/format-sdcard.sh $(SDCARD_NAME)
+	@echo Formatting $(SD_CARD_DEV_PATH_BOOT) :
+	$(mkfile_path)/tools/format-sdcard.sh $(SD_CARD_DEVICE)
 
 load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
-	sudo cp $(UBOOT_MLO) $(UBOOT_IMG) /media/$$USER/boot
-	sudo cp $(mkfile_path)uEnv.txt /media/$$USER/boot
-	sudo cp $(KERNEL_ZIMAGE) /media/$$USER/boot
-	sudo cp $(KERNEL_DTB) /media/$$USER/boot
+	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)
+	sudo mkdir -p $(SD_CARD_MOUNT_DIR)/boot
+	sudo cp $(UBOOT_MLO) $(UBOOT_IMG) $(SD_CARD_MOUNT_DIR)/boot
+	sudo cp $(mkfile_path)/uEnv.txt $(SD_CARD_MOUNT_DIR)/boot
+	sudo cp $(KERNEL_ZIMAGE) $(SD_CARD_MOUNT_DIR)/boot
+	sudo cp $(KERNEL_DTB) $(SD_CARD_MOUNT_DIR)/boot
+	sudo umount $(SD_CARD_DEV_PATH_BOOT)
+
+mount_sdcard:
+	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)
+
+umount_sdcard:
+	sudo umount $(SD_CARD_DEV_PATH_BOOT)
 
 
 ###############################################################################
