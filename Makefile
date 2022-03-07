@@ -106,7 +106,7 @@ kernel: $(KERNEL_ZIMAGE)
 ###############################################################################
 # SD card
 
-SD_CARD_MOUNT_DIR := $(mkfile_path)/sd-card-mount
+SD_CARD_MOUNT_DIR := $(mkfile_path)/sdcard_mount_dir
 
 SD_CARD_DEVICE := sda
 SD_CARD_DEV_PATH_BOOT := /dev/$(SD_CARD_DEVICE)1
@@ -116,6 +116,7 @@ format_sdcard:
 	$(mkfile_path)/tools/format-sdcard.sh $(SD_CARD_DEVICE)
 
 load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
+	sudo mkdir -p $(SD_CARD_MOUNT_DIR)
 	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)
 	sudo mkdir -p $(SD_CARD_MOUNT_DIR)/boot
 	sudo cp $(UBOOT_MLO) $(UBOOT_IMG) $(SD_CARD_MOUNT_DIR)/boot
