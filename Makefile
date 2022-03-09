@@ -65,10 +65,9 @@ CROSS_COMPILE := "ccache $(subst gcc,,$(notdir $(TOOLCHAIN)))"
 export PATH := $(dir $(TOOLCHAIN)):$(PATH)
 
 $(UBOOT_IMG) $(UBOOT_MLO): $(TOOLCHAIN)
-	echo "PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)"
-	return
-	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)
-	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE)
+	#echo "PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG)"
+	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) $(UBOOT_BOARD_CONFIG) -j
+	PATH=$(PATH) make -C $(UBOOT_DIR) CROSS_COMPILE=$(CROSS_COMPILE) -j
 
 ###############################################################################
 # KERNEL
@@ -112,13 +111,13 @@ SD_CARD_DEVICE := sda
 SD_CARD_DEV_PATH_BOOT := /dev/$(SD_CARD_DEVICE)1
 
 format_sdcard:
-	@echo Formatting $(SD_CARD_DEV_PATH_BOOT) :
+	@echo Formatting $(SD_CARD_DEVICE):
 	$(mkfile_path)/tools/format-sdcard.sh $(SD_CARD_DEVICE)
 
 load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 	sudo mkdir -p $(SD_CARD_MOUNT_DIR)
-	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)
 	sudo mkdir -p $(SD_CARD_MOUNT_DIR)/boot
+	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)/boot
 	sudo cp $(UBOOT_MLO) $(UBOOT_IMG) $(SD_CARD_MOUNT_DIR)/boot
 	sudo cp $(mkfile_path)/uEnv.txt $(SD_CARD_MOUNT_DIR)/boot
 	sudo cp $(KERNEL_ZIMAGE) $(SD_CARD_MOUNT_DIR)/boot
@@ -126,7 +125,7 @@ load_sdcard: $(UBOOT_IMG) $(UBOOT_MLO) $(KERNEL_ZIMAGE) $(KERNEL_DTB)
 	sudo umount $(SD_CARD_DEV_PATH_BOOT)
 
 mount_sdcard:
-	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)
+	sudo mount $(SD_CARD_DEV_PATH_BOOT) $(SD_CARD_MOUNT_DIR)/boot
 
 umount_sdcard:
 	sudo umount $(SD_CARD_DEV_PATH_BOOT)
