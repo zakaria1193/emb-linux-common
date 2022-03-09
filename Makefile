@@ -107,8 +107,12 @@ kernel: $(KERNEL_ZIMAGE)
 
 SD_CARD_MOUNT_DIR := $(mkfile_path)/sdcard_mount_dir
 
-SD_CARD_DEVICE := sda
-SD_CARD_DEV_PATH_BOOT := /dev/$(SD_CARD_DEVICE)1
+ifndef SD_CARD_DEVICE
+$(error SD_CARD_DEVICE is not set)
+endif
+
+SD_CARD_DEVICE := ${SD_CARD_DEVICE}
+SD_CARD_DEV_PATH_BOOT := /dev/${SD_CARD_DEVICE}1
 
 format_sdcard:
 	@echo Formatting $(SD_CARD_DEVICE):
