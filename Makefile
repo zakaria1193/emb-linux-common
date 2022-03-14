@@ -136,7 +136,7 @@ umount_sdcard:
 
 
 ###############################################################################
-BUILDROOT := $(mkfile_path)buildroot
+BUILDROOT := $(mkfile_path)/buildroot
 BUILDROOT_MAKE := cd $(BUILDROOT); make
 BUILDROOT_DEFCONFIG := $(BUILDROOT)/buildroot_defconfig
 
