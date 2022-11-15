@@ -2,9 +2,12 @@
 
 My playground for embedded linux builds:
 
+Manual build:
 - Toolchain build with crosstool-ng
-- U-Boot bootloader
-- Linux kernel
-- Buildroot build system
+- U-Boot bootloader custom build
+- Linux kernel build
 
-See `Makefile` for useful targets
+Automatic build:
+- Buildroot build system runner
+
+See `Makefile` for useful targets for both cases.
