@@ -152,12 +152,12 @@ buildroot_default_config:
 buildroot_custom_config:
 	$(BUILDROOT_MAKE) menuconfig
 	echo 'Config saved under $(BUILDROOT)/.config (Full verbose config)'
-	mv $(BUILDROOT)/.config  ./custom_config_full
+	cp $(BUILDROOT)/.config  ./custom_config_full
 	echo 'Config (full version) saved under ./custom_config_full'
 
 buildroot_save_config:
 	$(BUILDROOT_MAKE) savedefconfig
-	mv $(BUILDROOT)/defconfig  ./custom_config
+	cp $(BUILDROOT)/configs/raspberrypi4_defconfig ./custom_config
 	echo 'Config (compressed version) saved under ./custom_config'
 
 buildroot_build:
