@@ -107,9 +107,9 @@ kernel: $(KERNEL_ZIMAGE)
 
 SD_CARD_MOUNT_DIR := $(mkfile_path)/sdcard_mount_dir
 
-ifndef SD_CARD_DEVICE
-$(error SD_CARD_DEVICE is not set)
-endif
+# ifndef SD_CARD_DEVICE
+# $(error SD_CARD_DEVICE is not set)
+# endif
 
 SD_CARD_DEVICE := ${SD_CARD_DEVICE}
 SD_CARD_DEV_PATH_BOOT := /dev/${SD_CARD_DEVICE}1
@@ -138,21 +138,34 @@ umount_sdcard:
 ###############################################################################
 BUILDROOT := $(mkfile_path)/buildroot
 BUILDROOT_MAKE := cd $(BUILDROOT); make
-BUILDROOT_DEFCONFIG := $(BUILDROOT)/buildroot_defconfig
 
-buildroot_clean:
-	$(BUILDROOT_MAKE) clean
+buildroot_clean_config:
+	$(buildroot_make) distclean
 
-buildroot_config:
-	$(BUILDROOT_MAKE) beaglebone_defconfig
+buildroot_clean_build:
+	$(buildroot_make) clean
+
+buildroot_default_config:
+	$(BUILDROOT_MAKE) raspberrypi4_defconfig
+	echo $(BUILDROOT)/.config overwritten with default rpi4 config
+
+buildroot_custom_config:
+	$(BUILDROOT_MAKE) menuconfig
+	echo 'Config saved under $(BUILDROOT)/.config (Full verbose config)'
+	mv $(BUILDROOT)/.config  ./custom_config_full
+	echo 'Config (full version) saved under ./custom_config_full'
+
+buildroot_save_config:
 	$(BUILDROOT_MAKE) savedefconfig
+	mv $(BUILDROOT)/defconfig  ./custom_config
+	echo 'Config (compressed version) saved under ./custom_config'
 
-buildroot:
+buildroot_build:
 	$(BUILDROOT_MAKE)
 
 buildroot_load:
 	sudo dd if=$(BUILDROOT)/output/images/sdcard.img of=/dev/$(SDCARD_NAME) bs=1M
 
 
-.PHONY: u-boot toolchain format-sdcard kernel buildroot
+.PHONY: u-boot toolchain format-sdcard kernel buildroot_build buildroot_load buildroot_custom_config buildroot_save_config buildroot_clean_build buildroot_clean_config
 
