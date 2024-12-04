@@ -134,38 +134,4 @@ mount_sdcard:
 umount_sdcard:
 	sudo umount $(SD_CARD_DEV_PATH_BOOT)
 
-
-###############################################################################
-BUILDROOT := $(mkfile_path)/buildroot
-BUILDROOT_MAKE := cd $(BUILDROOT); make
-
-buildroot_clean_config:
-	$(buildroot_make) distclean
-
-buildroot_clean_build:
-	$(buildroot_make) clean
-
-buildroot_default_config:
-	$(BUILDROOT_MAKE) raspberrypi4_defconfig
-	echo $(BUILDROOT)/.config overwritten with default rpi4 config
-
-buildroot_custom_config:
-	$(BUILDROOT_MAKE) menuconfig
-	echo 'Config saved under $(BUILDROOT)/.config (Full verbose config)'
-	cp $(BUILDROOT)/.config  ./custom_config_full
-	echo 'Config (full version) saved under ./custom_config_full'
-
-buildroot_save_config:
-	$(BUILDROOT_MAKE) savedefconfig
-	cp $(BUILDROOT)/configs/raspberrypi4_defconfig ./custom_config
-	echo 'Config (compressed version) saved under ./custom_config'
-
-buildroot_build:
-	$(BUILDROOT_MAKE)
-
-buildroot_load:
-	sudo dd if=$(BUILDROOT)/output/images/sdcard.img of=/dev/$(SDCARD_NAME) bs=1M
-
-
-.PHONY: u-boot toolchain format-sdcard kernel buildroot_build buildroot_load buildroot_custom_config buildroot_save_config buildroot_clean_build buildroot_clean_config
-
+.PHONY: u-boot toolchain format-sdcard kernel umount_sdcard mount_sdcard 
