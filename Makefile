@@ -154,5 +154,5 @@ buildroot_load:
 	sudo dd if=$(BUILDROOT)/output/images/sdcard.img of=/dev/$(SDCARD_NAME) bs=1M
 
 
-.PHONY: u-boot toolchain format-sdcard kernel
+.PHONY: u-boot toolchain format-sdcard kernel buildroot
 
